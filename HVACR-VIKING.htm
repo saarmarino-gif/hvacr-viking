@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>HVACR-VIKING</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap');
+:root{
+  --bg:#263554;--bg2:#2f4068;--bg3:#3a4f7a;--bg4:#465e8c;
+  --border:#4a6090;--border2:#5a74aa;
+  --text:#f0f5ff;--text2:#b8ccee;--text3:#7a9ccc;
+  --accent:#5b9bff;--accent2:#88bcff;
+  --red:#ff6060;
+  --s1c:#f5b030;--s1b:#2e2008;--s1t:#ffe070;
+  --s2c:#f07848;--s2b:#2e1808;--s2t:#ffb890;
+  --s3c:#5b9bff;--s3b:#0c1e40;--s3t:#90c0ff;
+  --s4c:#30d068;--s4b:#082010;--s4t:#60f090;
+  --inst-c:#b088ff;--inst-b:#1a0f30;--inst-t:#d8b8ff;
+  --r:6px;--r2:10px;--r3:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);font-size:14px;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+
+/* ── TOPBAR ── */
+.topbar{height:52px;min-height:52px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 18px;gap:12px;z-index:60;}
+.brand{font-family:'Syne',sans-serif;font-weight:800;font-size:17px;display:flex;align-items:center;gap:9px;white-space:nowrap;}
+.brand-icon{width:28px;height:28px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:900;}
+.brand-sep{width:1px;height:18px;background:var(--border);margin:0 2px;}
+.project-name{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;cursor:pointer;padding:3px 7px;border-radius:4px;transition:all .15s;}
+.project-name:hover{background:var(--bg3);color:var(--text2);}
+.nav{display:flex;gap:1px;margin-left:8px;}
+.nav-btn{font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;padding:5px 14px;border-radius:var(--r);border:none;cursor:pointer;color:var(--text2);background:transparent;transition:all .12s;white-space:nowrap;}
+.nav-btn:hover{background:var(--bg3);color:var(--text);}
+.nav-btn.active{background:var(--bg4);color:var(--text);font-weight:600;}
+.spacer{flex:1;}
+.topbar-actions{display:flex;gap:6px;align-items:center;}
+.btn{font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;padding:6px 14px;border-radius:var(--r);border:1px solid var(--border2);cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .15s;white-space:nowrap;}
+.btn-ghost{background:transparent;color:var(--text2);}
+.btn-ghost:hover{background:var(--bg3);color:var(--text);}
+.btn-accent{background:var(--accent);color:#fff;border-color:var(--accent);}
+.btn-accent:hover{background:var(--accent2);}
+.btn-danger{background:transparent;color:var(--red);border-color:var(--red)40;}
+.btn-danger:hover{background:var(--red)12;}
+.btn-sm{padding:4px 10px;font-size:10px;}
+.btn-drive{background:#1a73e820;color:#4a9eff;border-color:#1a73e850;}
+.btn-drive:hover{background:#1a73e835;}
+.btn-drive.connected{background:#25b85620;color:var(--s4t);border-color:var(--s4c)50;}
+
+/* Drive status indicator */
+.drive-status{display:flex;align-items:center;gap:6px;font-size:10px;font-family:'JetBrains Mono',monospace;padding:4px 10px;border-radius:var(--r);background:var(--bg3);border:1px solid var(--border);}
+.drive-dot{width:7px;height:7px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:background .3s;}
+.drive-dot.ok{background:var(--s4c);box-shadow:0 0 6px var(--s4c)60;}
+.drive-dot.syncing{background:var(--s3c);animation:pulse 1s infinite;}
+.drive-dot.error{background:var(--red);}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+.drive-lbl{color:var(--text3);}
+
+/* ── LAYOUT ── */
+.app-body{display:flex;height:calc(100vh - 52px);overflow:hidden;}
+
+/* ── SIDEBAR ── */
+.sidebar{width:210px;min-width:210px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;}
+.sb-section{padding:12px 10px 6px;}
+.sb-head{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text2);padding:0 6px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;}
+.sb-head-add{background:none;border:none;color:var(--text3);cursor:pointer;font-size:15px;line-height:1;padding:0 2px;transition:color .12s;}
+.sb-head-add:hover{color:var(--accent2);}
+.sb-item{width:100%;text-align:left;padding:8px 10px;border-radius:var(--r);border:none;background:transparent;color:var(--text2);font-family:'Outfit',sans-serif;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:6px;transition:all .12s;}
+.sb-item:hover{background:var(--bg3);color:var(--text);}
+.sb-item.active{background:var(--accent)15;color:var(--accent2);font-weight:600;}
+.sb-item-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sb-badge{font-size:10px;font-family:'JetBrains Mono',monospace;background:var(--bg3);border:1px solid var(--border);padding:1px 5px;border-radius:3px;color:var(--text2);flex-shrink:0;}
+.sb-divider{height:1px;background:var(--border);margin:6px 10px;}
+.mini-stats{padding:4px 10px 12px;display:grid;grid-template-columns:1fr 1fr;gap:4px;}
+.mini-stat{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:8px 8px;}
+.mini-n{font-family:'JetBrains Mono',monospace;font-size:18px;line-height:1;}
+.mini-l{font-size:10px;color:var(--text2);margin-top:3px;text-transform:uppercase;letter-spacing:.05em;}
+.mini-stat.s1 .mini-n{color:var(--s1t);}
+.mini-stat.s2 .mini-n{color:var(--s2t);}
+.mini-stat.s3 .mini-n{color:var(--s3t);}
+.mini-stat.s4 .mini-n{color:var(--s4t);}
+.mini-stat.si .mini-n{color:var(--inst-t);}
+.prog{padding:0 10px 14px;}
+.prog-bar{height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--s3c),var(--s4c));border-radius:2px;transition:width .4s;}
+.prog-txt{font-size:11px;color:var(--text2);margin-top:4px;}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.view{display:none;flex:1;flex-direction:column;overflow:hidden;}
+.view.active{display:flex;}
+
+/* ── TOOLBAR ── */
+.toolbar{padding:9px 16px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:7px;flex-wrap:wrap;flex-shrink:0;}
+.toolbar-left{display:flex;align-items:center;gap:7px;flex:1;flex-wrap:wrap;}
+.tb-sep{width:1px;height:20px;background:var(--border);flex-shrink:0;}
+.sel-info{font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--text3);white-space:nowrap;}
+.status-btn{font-size:10px;font-weight:700;letter-spacing:.04em;padding:5px 12px;border-radius:var(--r);border:1.5px solid transparent;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .15s;white-space:nowrap;}
+.status-btn.s1{background:var(--s1b);color:var(--s1t);border-color:var(--s1c)40;}
+.status-btn.s1:hover{border-color:var(--s1c);}
+.status-btn.s2{background:var(--s2b);color:var(--s2t);border-color:var(--s2c)40;}
+.status-btn.s2:hover{border-color:var(--s2c);}
+.status-btn.s3{background:var(--s3b);color:var(--s3t);border-color:var(--s3c)40;}
+.status-btn.s3:hover{border-color:var(--s3c);}
+.status-btn.s4{background:var(--s4b);color:var(--s4t);border-color:var(--s4c)40;}
+.status-btn.s4:hover{border-color:var(--s4c);}
+.filter-sel{background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'Outfit',sans-serif;font-size:12px;padding:5px 9px;border-radius:var(--r);cursor:pointer;}
+.filter-sel:focus{outline:none;border-color:var(--accent);}
+.search-inp{background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'Outfit',sans-serif;font-size:12px;padding:5px 10px;border-radius:var(--r);width:160px;}
+.search-inp:focus{outline:none;border-color:var(--accent);}
+.search-inp::placeholder{color:var(--text3);}
+
+/* NEW ENTRY BAR */
+.new-entry-bar{padding:8px 16px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.new-entry-label{font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-right:4px;}
+.new-defect-btn{font-size:12px;font-weight:700;padding:7px 15px;border-radius:var(--r);border:1.5px solid var(--red)60;background:var(--red)15;color:#ff8080;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .15s;}
+.new-defect-btn:hover{border-color:var(--red);background:var(--red)25;}
+.new-inst-btn{font-size:12px;font-weight:700;padding:7px 15px;border-radius:var(--r);border:1.5px solid var(--inst-c)60;background:var(--inst-b);color:var(--inst-t);cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .15s;}
+.new-inst-btn:hover{border-color:var(--inst-c);}
+
+/* TABLE */
+.table-wrap{flex:1;overflow-y:auto;overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{position:sticky;top:0;z-index:10;background:var(--bg3);border-bottom:2px solid var(--border2);padding:10px 13px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);white-space:nowrap;}
+thead th:first-child{width:36px;text-align:center;}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s;cursor:pointer;}
+tbody tr:hover{background:var(--bg2);}
+tbody tr.selected{background:var(--accent)08;}
+tbody td{padding:9px 12px;vertical-align:middle;}
+td.check-td{text-align:center;}
+.cb{width:14px;height:14px;accent-color:var(--accent);cursor:pointer;}
+td.zona-td{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;color:var(--accent2);white-space:nowrap;}
+td.req-td{max-width:300px;line-height:1.5;}
+td.fecha-td{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);white-space:nowrap;}
+.type-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.05em;white-space:nowrap;}
+.type-badge.defecto{background:var(--red)18;color:#ff8080;border:1px solid var(--red)50;}
+.type-badge.instalacion{background:var(--inst-b);color:var(--inst-t);border:1px solid var(--inst-c)50;}
+.contrata-tag{display:inline-block;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:700;background:var(--bg3);border:1px solid var(--border2);color:var(--text);}
+.status-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap;}
+.status-pill::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.status-pill.s0{background:var(--bg3);color:var(--text3);}.status-pill.s0::before{background:var(--text3);}
+.status-pill.s1{background:var(--s1b);color:var(--s1t);}.status-pill.s1::before{background:var(--s1c);}
+.status-pill.s2{background:var(--s2b);color:var(--s2t);}.status-pill.s2::before{background:var(--s2c);}
+.status-pill.s3{background:var(--s3b);color:var(--s3t);}.status-pill.s3::before{background:var(--s3c);}
+.status-pill.s4{background:var(--s4b);color:var(--s4t);}.status-pill.s4::before{background:var(--s4c);}
+.status-pill.si{background:var(--inst-b);color:var(--inst-t);}.status-pill.si::before{background:var(--inst-c);}
+.foto-hint{font-size:10px;color:var(--text3);}
+.obs-inp{background:transparent;border:none;color:var(--text2);font-family:'Outfit',sans-serif;font-size:11px;width:100%;padding:1px 0;}
+.obs-inp:focus{outline:none;color:var(--text);}
+.empty-state{padding:60px 20px;text-align:center;color:var(--text3);}
+.empty-icon{font-size:36px;margin-bottom:10px;}
+
+/* CONFIG */
+.config-wrap{flex:1;overflow-y:auto;padding:24px;}
+.config-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;max-width:1100px;}
+.config-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r3);overflow:hidden;}
+.config-card-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.config-card-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.config-card-body{padding:14px 18px;}
+.config-list{display:flex;flex-direction:column;gap:4px;margin-bottom:12px;}
+.config-list-item{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--border);}
+.config-list-item-name{flex:1;font-size:13px;}
+.config-list-item-sub{font-size:11px;color:var(--text2);font-family:'JetBrains Mono',monospace;}
+.config-list-item-actions{display:flex;gap:4px;opacity:0;transition:opacity .12s;}
+.config-list-item:hover .config-list-item-actions{opacity:1;}
+.icon-btn{background:none;border:none;cursor:pointer;color:var(--text3);font-size:13px;padding:3px 5px;border-radius:4px;transition:all .12s;line-height:1;}
+.icon-btn:hover{background:var(--bg4);color:var(--text);}
+.icon-btn.del:hover{color:var(--red);}
+.config-add-row{display:flex;gap:6px;}
+.config-inp{flex:1;background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'Outfit',sans-serif;font-size:13px;padding:7px 10px;border-radius:var(--r);}
+.config-inp:focus{outline:none;border-color:var(--accent);}
+.config-inp::placeholder{color:var(--text3);}
+.zona-chip{display:inline-flex;align-items:center;gap:5px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:4px 11px;font-size:11px;margin:3px;}
+.zona-chip-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:12px;line-height:1;padding:0 0 0 2px;}
+.zona-chip-del:hover{color:var(--red);}
+.zonas-wrap{margin-bottom:10px;min-height:30px;}
+.config-sub{font-size:11px;color:var(--text2);margin-bottom:8px;}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;z-index:200;background:#000000bb;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
+.overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r3);width:min(600px,95vw);max-height:90vh;overflow-y:auto;transform:translateY(10px);transition:transform .2s;box-shadow:0 24px 60px #00000070;}
+.overlay.open .modal{transform:translateY(0);}
+.modal-hdr{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-shrink:0;}
+.modal-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;}
+.modal-sub{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.modal-close{background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:2px;line-height:1;}
+.modal-close:hover{color:var(--text);}
+.modal-body{padding:18px 20px;}
+.modal-section{margin-bottom:18px;}
+.modal-section-title{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text2);margin-bottom:9px;}
+.form-row{display:flex;gap:8px;margin-bottom:8px;}
+.form-group{display:flex;flex-direction:column;gap:5px;flex:1;}
+.form-label{font-size:11px;color:var(--text2);font-weight:500;}
+.form-control{background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'Outfit',sans-serif;font-size:13px;padding:8px 10px;border-radius:var(--r);width:100%;}
+.form-control:focus{outline:none;border-color:var(--accent);}
+textarea.form-control{resize:vertical;min-height:60px;}
+.type-selector{display:flex;gap:6px;}
+.type-opt{flex:1;padding:9px;border-radius:var(--r);border:1.5px solid var(--border);background:var(--bg3);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;text-align:center;transition:all .15s;}
+.type-opt.active-defecto{background:var(--red)15;color:#ff8080;border-color:var(--red)70;}
+.type-opt.active-instalacion{background:var(--inst-b);color:var(--inst-t);border-color:var(--inst-c)70;}
+.status-selector{display:flex;gap:5px;flex-wrap:wrap;}
+.status-opt{padding:6px 13px;border-radius:var(--r);border:1.5px solid var(--border);background:var(--bg3);color:var(--text2);font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;}
+.status-opt.as1{background:var(--s1b);color:var(--s1t);border-color:var(--s1c);}
+.status-opt.as2{background:var(--s2b);color:var(--s2t);border-color:var(--s2c);}
+.status-opt.as3{background:var(--s3b);color:var(--s3t);border-color:var(--s3c);}
+.status-opt.as4{background:var(--s4b);color:var(--s4t);border-color:var(--s4c);}
+.dates-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:7px;margin-bottom:8px;}
+.photo-card{position:relative;border-radius:var(--r);overflow:hidden;border:1px solid var(--border2);}
+.photo-card img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;cursor:pointer;}
+.photo-label{position:absolute;bottom:0;left:0;right:0;background:#00000090;padding:3px 7px;font-size:8px;font-weight:700;text-transform:uppercase;color:#fff;}
+.photo-del{position:absolute;top:4px;right:4px;background:#00000090;border:none;color:#fff;width:18px;height:18px;border-radius:3px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;}
+.photo-card:hover .photo-del{opacity:1;}
+.upload-area{border:2px dashed var(--border2);border-radius:var(--r);padding:16px;text-align:center;cursor:pointer;transition:all .15s;color:var(--text3);font-size:11px;}
+.upload-area:hover{border-color:var(--accent);color:var(--accent2);background:var(--accent)06;}
+.upload-area input{display:none;}
+.modal-footer{padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;}
+
+/* DRIVE MODAL */
+.drive-modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r3);width:min(460px,94vw);padding:28px;transform:translateY(10px);transition:transform .2s;box-shadow:0 24px 60px #00000070;}
+.overlay.open .drive-modal{transform:translateY(0);}
+.drive-modal-icon{font-size:36px;margin-bottom:12px;}
+.drive-modal-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:6px;}
+.drive-modal-msg{font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:20px;}
+.drive-file-info{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:12px 16px;margin-bottom:16px;}
+.drive-file-name{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent2);margin-bottom:4px;}
+.drive-file-sub{font-size:10px;color:var(--text3);}
+.drive-modal-actions{display:flex;gap:8px;justify-content:flex-end;}
+
+/* Lightbox */
+.lightbox{position:fixed;inset:0;z-index:300;background:#000000ee;display:none;align-items:center;justify-content:center;}
+.lightbox.open{display:flex;}
+.lightbox img{max-width:90vw;max-height:90vh;border-radius:var(--r);}
+.lb-close{position:absolute;top:14px;right:18px;background:none;border:none;color:#fff;font-size:26px;cursor:pointer;}
+
+/* Toast */
+.toast{position:fixed;bottom:20px;right:20px;z-index:400;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:9px 15px;font-size:11px;color:var(--text);transform:translateY(10px);opacity:0;transition:all .22s;pointer-events:none;box-shadow:0 8px 24px #00000050;display:flex;align-items:center;gap:8px;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast-dot{width:7px;height:7px;border-radius:50%;background:var(--s4c);}
+
+/* Confirm */
+.confirm-modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r3);width:min(360px,90vw);padding:24px;transform:translateY(10px);transition:transform .2s;box-shadow:0 24px 60px #00000070;}
+.overlay.open .confirm-modal{transform:translateY(0);}
+.confirm-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:8px;}
+.confirm-msg{font-size:12px;color:var(--text2);margin-bottom:20px;line-height:1.5;}
+.confirm-actions{display:flex;justify-content:flex-end;gap:8px;}
+
+@media print{.topbar,.sidebar,.toolbar,.new-entry-bar{display:none!important;}.app-body{height:auto!important;}.main{overflow:visible!important;}.table-wrap{overflow:visible!important;height:auto!important;}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-icon">H</div>
+    HVACR-VIKING
+    <div class="brand-sep"></div>
+    <span class="project-name" onclick="editProjectName()" id="project-name-lbl">Sin proyecto</span>
+  </div>
+  <div class="nav">
+    <button class="nav-btn active" id="nav-insp" onclick="showView('inspeccion')">Inspección</button>
+    <button class="nav-btn" id="nav-conf" onclick="showView('config')">Configuración</button>
+  </div>
+  <div class="spacer"></div>
+  <div class="topbar-actions">
+    <div class="drive-status" id="drive-status">
+      <div class="drive-dot" id="drive-dot"></div>
+      <span class="drive-lbl" id="drive-lbl">Google Drive</span>
+    </div>
+    <button class="btn btn-drive" id="btn-drive" onclick="handleDriveBtn()">Conectar Drive</button>
+    <button class="btn btn-ghost" onclick="window.print()">🖨 Imprimir</button>
+  </div>
+</div>
+
+<div class="app-body">
+  <div class="sidebar">
+    <div class="sb-section">
+      <div class="sb-head">Plantas <button class="sb-head-add" onclick="addPlanta()">＋</button></div>
+      <div id="planta-list"><div style="font-size:11px;color:var(--text3);padding:6px 10px;">Añade plantas en Configuración</div></div>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="sb-section" style="padding-bottom:4px;"><div class="sb-head">Progreso</div></div>
+    <div class="mini-stats" id="mini-stats">
+    <div class="mini-stat s1"><div class="mini-n">0</div><div class="mini-l">Identificado</div></div>
+    <div class="mini-stat s2"><div class="mini-n">0</div><div class="mini-l">Notificado</div></div>
+    <div class="mini-stat s3"><div class="mini-n">0</div><div class="mini-l">En ejecución</div></div>
+    <div class="mini-stat s4"><div class="mini-n">0</div><div class="mini-l">Ejecutado</div></div>
+    <div class="mini-stat si" style="grid-column:span 2"><div class="mini-n">0</div><div class="mini-l">Instalaciones</div></div></div>
+    <div class="prog">
+      <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width: 0%;"></div></div>
+      <div class="prog-txt" id="prog-txt">Defectos: 0% resueltos (0/0)</div>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- INSPECCIÓN -->
+    <div class="view active" id="view-inspeccion">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <span class="sel-info" id="sel-info">Ninguna seleccionada</span>
+          <div class="tb-sep"></div>
+          <span style="font-size:10px;color:var(--text3);font-weight:600;">Marcar:</span>
+          <button class="status-btn s1" onclick="bulkStatus('IDENTIFICADO')">● IDENTIFICADO</button>
+          <button class="status-btn s2" onclick="bulkStatus('NOTIFICADO')">● NOTIFICADO</button>
+          <button class="status-btn s3" onclick="bulkStatus('EN EJECUCIÓN')">● EN EJECUCIÓN</button>
+          <button class="status-btn s4" onclick="bulkStatus('EJECUTADO')">● EJECUTADO</button>
+        </div>
+        <select class="filter-sel" id="filter-contrata" onchange="applyFilters()"><option value="" selected="selected">Todas las contratas</option></select>
+        <select class="filter-sel" id="filter-estado" onchange="applyFilters()">
+          <option value="" selected="selected">Todos los estados</option>
+          <option>IDENTIFICADO</option><option>NOTIFICADO</option><option>EN EJECUCIÓN</option><option>EJECUTADO</option><option value="INSTALACION">INSTALACIÓN</option>
+        </select>
+        <select class="filter-sel" id="filter-zona" onchange="applyFilters()"><option value="" selected="selected">Todas las zonas</option></select>
+        <input class="search-inp" id="search-inp" placeholder="🔍 Buscar..." oninput="applyFilters()">
+      </div>
+      <div class="new-entry-bar">
+        <span class="new-entry-label">Nuevo registro:</span>
+        <button class="new-defect-btn" onclick="openModal(null,'defecto')">⚠ Defecto / Repaso</button>
+        <button class="new-inst-btn" onclick="openModal(null,'instalacion')">✓ Registro de Instalación</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th><input type="checkbox" class="cb" id="cb-all" onchange="toggleAll(this.checked)"></th>
+            <th>Zona</th><th>Descripción</th><th>Tipo</th><th>Contrata</th><th>Estado</th>
+            <th>F.Identificado</th><th>F.Notificado</th><th>F.Ejecución</th><th>F.Ejecutado</th>
+            <th>Fotos</th><th>Observaciones</th><th></th>
+          </tr></thead>
+          <tbody id="table-body"></tbody>
+        </table>
+        <div class="empty-state" id="empty-state" style="">
+          <div class="empty-icon">📋</div>
+          <div id="empty-txt" style="font-size:12px;">Crea una planta en Configuración</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONFIG -->
+    <div class="view" id="view-config">
+      <div class="config-wrap">
+        <div style="margin-bottom:20px;">
+          <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:4px;">Configuración</div>
+          <div style="font-size:12px;color:var(--text2);">Gestiona proyecto, plantas, zonas y contratas.</div>
+        </div>
+        <div class="config-grid">
+          <div class="config-card">
+            <div class="config-card-header"><div class="config-card-title">🏗 Proyecto</div></div>
+            <div class="config-card-body">
+              <div class="form-group" style="margin-bottom:10px;">
+                <div class="form-label">Nombre del proyecto</div>
+                <input class="config-inp" id="cfg-project-name" placeholder="Ej: Hotel Mediterráneo" oninput="saveProjectName()">
+              </div>
+              <div class="form-group">
+                <div class="form-label">Referencia / Código</div>
+                <input class="config-inp" id="cfg-project-ref" placeholder="Ej: MC-251492" oninput="saveProjectRef()">
+              </div>
+            </div>
+          </div>
+          <div class="config-card">
+            <div class="config-card-header"><div class="config-card-title">🏢 Plantas</div><button class="btn btn-sm btn-accent" onclick="addPlanta()">＋ Añadir</button></div>
+            <div class="config-card-body">
+              <div class="config-sub">Crea una planta por nivel.</div>
+              <div class="config-list" id="cfg-planta-list"></div>
+              <div class="config-add-row">
+                <input class="config-inp" id="new-planta-inp" placeholder="Ej: Planta 3, Sótano, Cubierta...">
+                <button class="btn btn-accent btn-sm" onclick="addPlantaFromInput()">＋</button>
+              </div>
+            </div>
+          </div>
+          <div class="config-card">
+            <div class="config-card-header"><div class="config-card-title">📍 Zonas</div></div>
+            <div class="config-card-body">
+              <div class="config-sub">Selecciona la planta y añade sus zonas</div>
+              <select class="config-inp" id="cfg-zona-planta" onchange="renderCfgZonas()" style="margin-bottom:10px;"><option value="" selected="selected">— Selecciona planta —</option></select>
+              <div class="zonas-wrap" id="cfg-zonas-wrap"></div>
+              <div class="config-add-row" id="cfg-zona-add-row" style="display:none">
+                <input class="config-inp" id="new-zona-inp" placeholder="Nº o nombre (ej: 413, Pasillo Norte)">
+                <button class="btn btn-accent btn-sm" onclick="addZona()">＋</button>
+              </div>
+            </div>
+          </div>
+          <div class="config-card">
+            <div class="config-card-header"><div class="config-card-title">🔧 Contratas</div></div>
+            <div class="config-card-body">
+              <div class="config-sub">Empresas que ejecutan los trabajos</div>
+              <div class="config-list" id="cfg-contrata-list"></div>
+              <div class="config-add-row" style="flex-direction:column;gap:6px;">
+                <input class="config-inp" id="new-contrata-nombre" placeholder="Nombre (ej: CAL, VALCOM...)">
+                <input class="config-inp" id="new-contrata-esp" placeholder="Especialidad (ej: Climatización, PCI...)">
+                <button class="btn btn-accent btn-sm" onclick="addContrataFromInput()" style="align-self:flex-end;">＋ Añadir</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- REGISTRO MODAL -->
+<div class="overlay" id="reg-overlay" onclick="closeModalClick(event)">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div><div class="modal-title" id="modal-title">Nuevo registro</div><div class="modal-sub" id="modal-sub"></div></div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section">
+        <div class="modal-section-title">Tipo de registro</div>
+        <div class="type-selector">
+          <div class="type-opt" id="type-defecto" onclick="setModalType('defecto')">⚠ Defecto / Repaso</div>
+          <div class="type-opt" id="type-instalacion" onclick="setModalType('instalacion')">✓ Registro de Instalación</div>
+        </div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-title">Ubicación y responsable</div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Zona</label><select class="form-control" id="modal-zona"><option value="" selected="selected">— Zona —</option></select></div>
+          <div class="form-group"><label class="form-label">Contrata</label><select class="form-control" id="modal-contrata"><option value="" selected="selected">— Contrata —</option></select></div>
+        </div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-title">Descripción</div>
+        <textarea class="form-control" id="modal-desc" placeholder="Describe el defecto o lo que se ha instalado..."></textarea>
+      </div>
+      <div class="modal-section" id="modal-status-section">
+        <div class="modal-section-title">Estado</div>
+        <div class="status-selector" id="modal-status-sel"></div>
+      </div>
+      <div class="modal-section" id="modal-dates-section">
+        <div class="modal-section-title">Registro de fechas</div>
+        <div class="dates-grid">
+          <div class="form-group"><label class="form-label">📌 F. Identificado</label><input type="date" class="form-control" id="md-f1"></div>
+          <div class="form-group"><label class="form-label">📢 F. Notificado</label><input type="date" class="form-control" id="md-f2"></div>
+          <div class="form-group"><label class="form-label">🔧 F. En Ejecución</label><input type="date" class="form-control" id="md-f3"></div>
+          <div class="form-group"><label class="form-label">✅ F. Ejecutado</label><input type="date" class="form-control" id="md-f4"></div>
+        </div>
+      </div>
+      <div class="modal-section" id="modal-inst-date-section" style="display:none;">
+        <div class="modal-section-title">Fecha de instalación</div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Fecha</label><input type="date" class="form-control" id="md-inst-date"></div>
+          <div class="form-group"><label class="form-label">Instalado por</label><input type="text" class="form-control" id="md-inst-by" placeholder="Nombre o firma"></div>
+        </div>
+      </div>
+      <div class="modal-section" id="modal-pre-section">
+        <div class="modal-section-title" id="modal-pre-title">📷 Fotos PRE servicio</div>
+        <div class="photo-grid" id="photos-pre"></div>
+        <label class="upload-area"><input type="file" accept="image/*" multiple="" onchange="addPhotos('pre',this)">＋ Añadir fotos PRE · Clic o arrastra</label>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-title" id="modal-post-title">📷 Fotos POST servicio</div>
+        <div class="photo-grid" id="photos-post"></div>
+        <label class="upload-area"><input type="file" accept="image/*" multiple="" onchange="addPhotos('post',this)">＋ Añadir fotos POST · Clic o arrastra</label>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-title">Observaciones</div>
+        <textarea class="form-control" id="modal-obs" placeholder="Notas, aclaraciones, incidencias..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-accent" onclick="saveModal()">Guardar registro</button>
+    </div>
+  </div>
+</div>
+
+<!-- DRIVE MODAL -->
+<div class="overlay" id="drive-overlay">
+  <div class="drive-modal">
+    <div class="drive-modal-icon" id="dm-icon">☁️</div>
+    <div class="drive-modal-title" id="dm-title">Conectar Google Drive</div>
+    <div class="drive-modal-msg" id="dm-msg"></div>
+    <div class="drive-file-info" id="dm-file-info" style="display:none">
+      <div class="drive-file-name" id="dm-file-name"></div>
+      <div class="drive-file-sub" id="dm-file-sub"></div>
+    </div>
+    <div class="drive-modal-actions" id="dm-actions"></div>
+  </div>
+</div>
+
+<!-- CONFIRM -->
+<div class="overlay" id="confirm-overlay">
+  <div class="confirm-modal">
+    <div class="confirm-title" id="confirm-title">¿Confirmar?</div>
+    <div class="confirm-msg" id="confirm-msg"></div>
+    <div class="confirm-actions">
+      <button class="btn btn-ghost" onclick="confirmResolve(false)">Cancelar</button>
+      <button class="btn btn-danger" onclick="confirmResolve(true)">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()"><button class="lb-close">✕</button><img id="lb-img" src="" alt=""></div>
+<div class="toast" id="toast"><div class="toast-dot"></div><span id="toast-msg"></span></div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// GOOGLE DRIVE CONFIG
+// ══════════════════════════════════════════════════════
+const CLIENT_ID = '457410185150-tunere1lem688ahlh343nbaq8hu00u93.apps.googleusercontent.com';
+const SCOPES    = 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file';
+const FILE_NAME = 'gestobra_data.json';
+const FOLDER_NAME = 'HVACR-VIKING';
+
+// ══════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════
+const STATUSES = ['IDENTIFICADO','NOTIFICADO','EN EJECUCIÓN','EJECUTADO'];
+let S = { project:{name:'',ref:''}, plantas:[], zonas:{}, contratas:[], registros:{}, currentPlanta:null, selected:new Set(), filters:{contrata:'',estado:'',zona:'',search:''} };
+function saveLocal() {}
+function loadLocal() { return false; }
+let _id = Date.now();
+function uid() { return 'r_' + (++_id); }
+
+// ══════════════════════════════════════════════════════
+// GOOGLE DRIVE — implementación completa
+// ══════════════════════════════════════════════════════
+let gapi_loaded = false, gis_loaded = false;
+let token_client = null, access_token = null;
+let drive_file_id = null, drive_syncing = false;
+
+function loadGoogleScripts() {
+  return new Promise(res => {
+    const s1 = document.createElement('script');
+    s1.src = 'https://apis.google.com/js/api.js';
+    s1.onload = () => {
+      gapi.load('client', async () => {
+        await gapi.client.init({});
+        await gapi.client.load('https://www.googleapis.com/discovery/v1/apis/drive/v3/rest');
+        gapi_loaded = true;
+        if (gis_loaded) res();
+      });
+    };
+    document.head.appendChild(s1);
+    const s2 = document.createElement('script');
+    s2.src = 'https://accounts.google.com/gsi/client';
+    s2.onload = () => {
+      token_client = google.accounts.oauth2.initTokenClient({
+        client_id: CLIENT_ID,
+        scope: SCOPES,
+        callback: onTokenResponse,
+      });
+      gis_loaded = true;
+      if (gapi_loaded) res();
+    };
+    document.head.appendChild(s2);
+  });
+}
+
+function onTokenResponse(resp) {
+  if (resp.error) { setDriveStatus('error','Error auth'); return; }
+  access_token = resp.access_token;
+  gapi.client.setToken({ access_token });
+  sessionStorage.setItem('hv_token', access_token);
+  setDriveStatus('syncing','Conectando...');
+  closeDriveModal();
+  syncFromDrive();
+}
+
+function handleDriveBtn() {
+  if (access_token) {
+    document.getElementById('dm-icon').textContent = '✅';
+    document.getElementById('dm-title').textContent = 'Drive conectado';
+    document.getElementById('dm-msg').textContent = 'Los datos se sincronizan automáticamente con tu Google Drive.';
+    document.getElementById('dm-file-info').style.display = '';
+    document.getElementById('dm-file-name').textContent = FILE_NAME;
+    document.getElementById('dm-file-sub').textContent = 'Carpeta: ' + FOLDER_NAME;
+    document.getElementById('dm-actions').innerHTML =
+      '<button class="btn btn-ghost" onclick="closeDriveModal()">Cerrar</button>' +
+      '<button class="btn btn-accent" onclick="syncToDrive();closeDriveModal()">☁ Guardar ahora</button>' +
+      '<button class="btn btn-danger" onclick="disconnectDrive()">Desconectar</button>';
+  } else {
+    document.getElementById('dm-icon').textContent = '☁️';
+    document.getElementById('dm-title').textContent = 'Conectar Google Drive';
+    document.getElementById('dm-msg').textContent = 'Tus datos se guardarán automáticamente en una carpeta "HVACR-VIKING" en tu Google Drive. Funciona en iPad, móvil y cualquier dispositivo.';
+    document.getElementById('dm-file-info').style.display = 'none';
+    document.getElementById('dm-actions').innerHTML =
+      '<button class="btn btn-ghost" onclick="closeDriveModal()">Cancelar</button>' +
+      '<button class="btn btn-accent" onclick="startDriveAuth()">🔑 Conectar con Google</button>';
+  }
+  document.getElementById('drive-overlay').classList.add('open');
+}
+
+function closeDriveModal() { document.getElementById('drive-overlay').classList.remove('open'); }
+
+function setDriveStatus(state, label) {
+  const dot = document.getElementById('drive-dot');
+  const lbl = document.getElementById('drive-lbl');
+  if (dot) dot.className = 'drive-dot' + (state ? ' ' + state : '');
+  if (lbl) lbl.textContent = label;
+  const btn = document.getElementById('btn-drive');
+  if (!btn) return;
+  if (state === 'ok') { btn.textContent = '☁ Drive ✓'; btn.classList.add('connected'); }
+  else if (state === 'syncing') { btn.textContent = '↻ Sincronizando...'; }
+  else if (state === 'error') { btn.textContent = '⚠ Drive'; btn.classList.remove('connected'); }
+  else { btn.textContent = '☁ Drive'; btn.classList.remove('connected'); }
+}
+
+async function startDriveAuth() {
+  closeDriveModal();
+  setDriveStatus('syncing', 'Cargando...');
+  if (!gapi_loaded || !gis_loaded) await loadGoogleScripts();
+  token_client.requestAccessToken({ prompt: 'consent' });
+}
+
+function disconnectDrive() {
+  access_token = null; drive_file_id = null;
+  sessionStorage.removeItem('hv_token');
+  sessionStorage.removeItem('hv_file_id');
+  try { gapi.client.setToken(null); } catch(e) {}
+  setDriveStatus('', '☁ Drive');
+  closeDriveModal();
+  showToast('Drive desconectado');
+}
+
+async function getOrCreateFolder() {
+  const r = await gapi.client.drive.files.list({
+    q: `name='${FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+    fields: 'files(id)', spaces: 'drive'
+  });
+  if (r.result.files.length) return r.result.files[0].id;
+  const c = await gapi.client.drive.files.create({
+    resource: { name: FOLDER_NAME, mimeType: 'application/vnd.google-apps.folder' },
+    fields: 'id'
+  });
+  return c.result.id;
+}
+
+async function findDataFile(folderId) {
+  const r = await gapi.client.drive.files.list({
+    q: `name='${FILE_NAME}' and '${folderId}' in parents and trashed=false`,
+    fields: 'files(id,name)'
+  });
+  return r.result.files.length ? r.result.files[0] : null;
+}
+
+async function syncFromDrive() {
+  try {
+    setDriveStatus('syncing', 'Cargando datos...');
+    const folderId = await getOrCreateFolder();
+    const file = await findDataFile(folderId);
+    if (file) {
+      drive_file_id = file.id;
+      sessionStorage.setItem('hv_file_id', file.id);
+      const resp = await gapi.client.drive.files.get({ fileId: file.id, alt: 'media' });
+      const data = typeof resp.result === 'string' ? JSON.parse(resp.result) : resp.result;
+      Object.assign(S, data);
+      S.selected = new Set();
+      renderAll();
+      setDriveStatus('ok', 'Sincronizado ✓');
+      showToast('✓ Datos cargados desde Drive');
+    } else {
+      await syncToDrive();
+    }
+  } catch(e) {
+    console.error(e);
+    setDriveStatus('error', 'Error Drive');
+    showToast('⚠ Error al conectar con Drive');
+  }
+}
+
+async function syncToDrive() {
+  if (!access_token || drive_syncing) return;
+  drive_syncing = true;
+  setDriveStatus('syncing', 'Guardando...');
+  try {
+    const folderId = await getOrCreateFolder();
+    const dataStr = JSON.stringify(S, (k,v) => k==='selected' ? undefined : v, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    if (!drive_file_id) {
+      const meta = { name: FILE_NAME, parents: [folderId] };
+      const form = new FormData();
+      form.append('metadata', new Blob([JSON.stringify(meta)], { type: 'application/json' }));
+      form.append('file', blob);
+      const r = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${access_token}` },
+        body: form
+      });
+      const j = await r.json();
+      drive_file_id = j.id;
+      sessionStorage.setItem('hv_file_id', j.id);
+    } else {
+      await fetch(`https://www.googleapis.com/upload/drive/v3/files/${drive_file_id}?uploadType=media`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${access_token}`, 'Content-Type': 'application/json' },
+        body: dataStr
+      });
+    }
+    setDriveStatus('ok', 'Guardado ✓');
+  } catch(e) {
+    console.error(e);
+    setDriveStatus('error', 'Error Drive');
+  }
+  drive_syncing = false;
+}
+
+let _syncTimer;
+function scheduleSyncToDrive() {
+  clearTimeout(_syncTimer);
+  _syncTimer = setTimeout(() => syncToDrive(), 3000);
+}
+
+function save() { saveLocal(); scheduleSyncToDrive(); }
+
+async function tryRestoreSession() {
+  const savedToken = sessionStorage.getItem('hv_token');
+  const savedFileId = sessionStorage.getItem('hv_file_id');
+  if (savedToken) {
+    access_token = savedToken;
+    drive_file_id = savedFileId || null;
+    setDriveStatus('syncing', 'Reconectando...');
+    try {
+      if (!gapi_loaded) await loadGoogleScripts();
+      gapi.client.setToken({ access_token });
+      await syncFromDrive();
+    } catch(e) {
+      access_token = null;
+      setDriveStatus('error', 'Sesión expirada');
+    }
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// NAV
+// ══════════════════════════════════════════════════════
+function showView(v) {
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(el=>el.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  document.getElementById('nav-'+(v==='inspeccion'?'insp':'conf')).classList.add('active');
+  if (v==='config') renderConfig();
+}
+
+// ══════════════════════════════════════════════════════
+// PROJECT
+// ══════════════════════════════════════════════════════
+function editProjectName() {
+  const n = prompt('Nombre del proyecto:', S.project.name);
+  if (n!==null) { S.project.name=n.trim(); save(); renderProjectLabel(); }
+}
+function saveProjectName() { S.project.name=document.getElementById('cfg-project-name').value.trim(); save(); renderProjectLabel(); }
+function saveProjectRef()  { S.project.ref=document.getElementById('cfg-project-ref').value.trim(); save(); renderProjectLabel(); }
+function renderProjectLabel() {
+  document.getElementById('project-name-lbl').textContent =
+    (S.project.name||'Sin proyecto') + (S.project.ref?' · '+S.project.ref:'');
+}
+
+// ══════════════════════════════════════════════════════
+// PLANTAS
+// ══════════════════════════════════════════════════════
+function addPlanta() {
+  const n=prompt('Nombre de la planta:'); if(!n||!n.trim()) return;
+  const p={id:uid(),name:n.trim()};
+  S.plantas.push(p); S.zonas[p.id]=[]; S.registros[p.id]=[];
+  if(!S.currentPlanta) S.currentPlanta=p.id;
+  save(); renderAll();
+}
+function addPlantaFromInput() {
+  const inp=document.getElementById('new-planta-inp'); const n=inp.value.trim(); if(!n) return;
+  const p={id:uid(),name:n}; S.plantas.push(p); S.zonas[p.id]=[]; S.registros[p.id]=[];
+  if(!S.currentPlanta) S.currentPlanta=p.id;
+  inp.value=''; save(); renderAll(); renderConfig();
+}
+function renamePlanta(id) {
+  const p=S.plantas.find(p=>p.id===id); if(!p) return;
+  const n=prompt('Nuevo nombre:',p.name); if(n&&n.trim()){p.name=n.trim();save();renderAll();renderConfig();}
+}
+async function deletePlanta(id) {
+  const p=S.plantas.find(p=>p.id===id);
+  if(!await confirm2(`¿Eliminar "${p.name}"?`,'Se eliminarán todas sus zonas y registros.')) return;
+  S.plantas=S.plantas.filter(p=>p.id!==id); delete S.zonas[id]; delete S.registros[id];
+  if(S.currentPlanta===id) S.currentPlanta=S.plantas[0]?.id||null;
+  save(); renderAll(); renderConfig();
+}
+function switchPlanta(id) {
+  S.currentPlanta=id; S.selected.clear();
+  S.filters={contrata:'',estado:'',zona:'',search:''};
+  ['filter-contrata','filter-estado','filter-zona'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('search-inp').value='';
+  renderAll();
+}
+
+// ══════════════════════════════════════════════════════
+// ZONAS
+// ══════════════════════════════════════════════════════
+function sortedZonas(pid) {
+  return [...(S.zonas[pid]||[])].sort((a,b)=>{
+    const na=parseFloat(a),nb=parseFloat(b);
+    if(!isNaN(na)&&!isNaN(nb)) return na-nb;
+    if(!isNaN(na)) return -1; if(!isNaN(nb)) return 1;
+    return a.localeCompare(b);
+  });
+}
+function addZona() {
+  const pid=document.getElementById('cfg-zona-planta').value; if(!pid) return;
+  const inp=document.getElementById('new-zona-inp'); const z=inp.value.trim(); if(!z) return;
+  if(!S.zonas[pid]) S.zonas[pid]=[];
+  if(!S.zonas[pid].includes(z)) S.zonas[pid].push(z);
+  inp.value=''; save(); renderCfgZonas(); renderZonaFilter();
+}
+async function deleteZona(pid,zona) {
+  if(!await confirm2(`¿Eliminar zona "${zona}"?`,'Los registros de esta zona quedarán sin zona.')) return;
+  S.zonas[pid]=S.zonas[pid].filter(z=>z!==zona); save(); renderCfgZonas(); renderZonaFilter();
+}
+
+// ══════════════════════════════════════════════════════
+// CONTRATAS
+// ══════════════════════════════════════════════════════
+function addContrataFromInput() {
+  const n=document.getElementById('new-contrata-nombre').value.trim(); if(!n) return;
+  const esp=document.getElementById('new-contrata-esp').value.trim();
+  S.contratas.push({id:uid(),name:n,esp});
+  document.getElementById('new-contrata-nombre').value=''; document.getElementById('new-contrata-esp').value='';
+  save(); renderConfig(); renderContrataFilter();
+}
+function renameContrata(id) {
+  const c=S.contratas.find(c=>c.id===id); if(!c) return;
+  const n=prompt('Nuevo nombre:',c.name); if(n&&n.trim()){c.name=n.trim();save();renderConfig();renderContrataFilter();}
+}
+async function deleteContrata(id) {
+  const c=S.contratas.find(c=>c.id===id);
+  if(!await confirm2(`¿Eliminar contrata "${c.name}"?`,'Los registros quedarán sin contrata asignada.')) return;
+  S.contratas=S.contratas.filter(c=>c.id!==id); save(); renderConfig(); renderContrataFilter();
+}
+function contrataName(id) { return S.contratas.find(c=>c.id===id)?.name||id||'—'; }
+
+// ══════════════════════════════════════════════════════
+// REGISTROS
+// ══════════════════════════════════════════════════════
+function getRegistros() { return S.registros[S.currentPlanta]||[]; }
+function filteredRegistros() {
+  return getRegistros().filter(r=>{
+    if(S.filters.contrata && r.contrata!==S.filters.contrata) return false;
+    if(S.filters.estado){
+      if(S.filters.estado==='INSTALACION'){if(r.type!=='instalacion') return false;}
+      else {if(r.type!=='defecto'||r.status!==S.filters.estado) return false;}
+    }
+    if(S.filters.zona && r.zona!==S.filters.zona) return false;
+    if(S.filters.search){
+      const q=S.filters.search.toLowerCase();
+      if(!r.zona.toLowerCase().includes(q)&&!r.desc.toLowerCase().includes(q)&&!contrataName(r.contrata).toLowerCase().includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+// ══════════════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════════════
+function renderAll() {
+  renderProjectLabel(); renderPlantaList(); renderTable();
+  renderStats(); renderContrataFilter(); renderZonaFilter();
+}
+function renderPlantaList() {
+  const el=document.getElementById('planta-list');
+  if(!S.plantas.length){el.innerHTML='<div style="font-size:11px;color:var(--text3);padding:6px 10px;">Añade plantas en Configuración</div>';return;}
+  el.innerHTML=S.plantas.map(p=>{
+    const regs=S.registros[p.id]||[];
+    const done=regs.filter(r=>r.status==='EJECUTADO').length;
+    return `<button class="sb-item ${p.id===S.currentPlanta?'active':''}" onclick="switchPlanta('${p.id}')">
+      <span class="sb-item-name">${p.name}</span><span class="sb-badge">${done}/${regs.length}</span></button>`;
+  }).join('');
+}
+function renderStats() {
+  const regs=getRegistros(), c={s1:0,s2:0,s3:0,s4:0,si:0};
+  regs.forEach(r=>{ if(r.type==='instalacion') c.si++; else {const i=STATUSES.indexOf(r.status);if(i>=0)c['s'+(i+1)]++;} });
+  const def=regs.filter(r=>r.type==='defecto').length, done=c.s4;
+  document.getElementById('mini-stats').innerHTML=`
+    <div class="mini-stat s1"><div class="mini-n">${c.s1}</div><div class="mini-l">Identificado</div></div>
+    <div class="mini-stat s2"><div class="mini-n">${c.s2}</div><div class="mini-l">Notificado</div></div>
+    <div class="mini-stat s3"><div class="mini-n">${c.s3}</div><div class="mini-l">En ejecución</div></div>
+    <div class="mini-stat s4"><div class="mini-n">${c.s4}</div><div class="mini-l">Ejecutado</div></div>
+    <div class="mini-stat si" style="grid-column:span 2"><div class="mini-n">${c.si}</div><div class="mini-l">Instalaciones</div></div>`;
+  const pct=def?Math.round((done/def)*100):0;
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-txt').textContent=`Defectos: ${pct}% resueltos (${done}/${def})`;
+}
+function fmtDate(d){if(!d)return '';const[y,m,day]=d.split('-');return `${day}/${m}/${y}`;}
+function renderTable() {
+  const regs=filteredRegistros(), tbody=document.getElementById('table-body'), empty=document.getElementById('empty-state');
+  if(!S.currentPlanta){tbody.innerHTML='';empty.style.display='';document.getElementById('empty-txt').textContent='Crea una planta en Configuración';return;}
+  if(!regs.length){tbody.innerHTML='';empty.style.display='';document.getElementById('empty-txt').textContent=getRegistros().length?'No hay registros con estos filtros':'Añade registros con los botones de arriba';return;}
+  empty.style.display='none';
+  tbody.innerHTML=regs.map(r=>{
+    const sel=S.selected.has(r.id);
+    const sc=r.type==='instalacion'?'si':(STATUSES.indexOf(r.status)>=0?'s'+(STATUSES.indexOf(r.status)+1):'s0');
+    const pics=(r.photoPre?.length||0)+(r.photoPost?.length||0);
+    return `<tr class="${sel?'selected':''}" data-id="${r.id}" onclick="openModal('${r.id}')">
+      <td class="check-td" onclick="event.stopPropagation()"><input type="checkbox" class="cb" ${sel?'checked':''} onchange="toggleSel('${r.id}',this.checked)"></td>
+      <td class="zona-td">${r.zona||'—'}</td>
+      <td class="req-td">${r.desc||'—'}</td>
+      <td><span class="type-badge ${r.type}">${r.type==='instalacion'?'✓ Instalación':'⚠ Defecto'}</span></td>
+      <td><span class="contrata-tag">${contrataName(r.contrata)}</span></td>
+      <td><span class="status-pill ${sc}">${r.type==='instalacion'?'INSTALACIÓN':(r.status||'—')}</span></td>
+      <td class="fecha-td">${r.type==='instalacion'?fmtDate(r.instDate):fmtDate(r.dates?.s1)}</td>
+      <td class="fecha-td">${r.type==='defecto'?fmtDate(r.dates?.s2):''}</td>
+      <td class="fecha-td">${r.type==='defecto'?fmtDate(r.dates?.s3):''}</td>
+      <td class="fecha-td">${r.type==='defecto'?fmtDate(r.dates?.s4):''}</td>
+      <td><span class="foto-hint">${pics?'📷 '+pics:'—'}</span></td>
+      <td onclick="event.stopPropagation()"><input class="obs-inp" value="${(r.obs||'').replace(/"/g,'&quot;')}" placeholder="Nota..." onchange="quickObs('${r.id}',this.value)"></td>
+      <td onclick="event.stopPropagation()"><button class="btn btn-sm btn-danger" onclick="deleteReg('${r.id}')">✕</button></td>
+    </tr>`;
+  }).join('');
+  updateSelInfo();
+}
+function renderContrataFilter() {
+  const sel=document.getElementById('filter-contrata'),cur=sel.value;
+  sel.innerHTML='<option value="">Todas las contratas</option>'+S.contratas.map(c=>`<option value="${c.id}" ${c.id===cur?'selected':''}>${c.name}</option>`).join('');
+}
+function renderZonaFilter() {
+  if(!S.currentPlanta) return;
+  const sel=document.getElementById('filter-zona'),cur=sel.value;
+  sel.innerHTML='<option value="">Todas las zonas</option>'+sortedZonas(S.currentPlanta).map(z=>`<option value="${z}" ${z===cur?'selected':''}>${z}</option>`).join('');
+}
+function applyFilters() {
+  S.filters.contrata=document.getElementById('filter-contrata').value;
+  S.filters.estado=document.getElementById('filter-estado').value;
+  S.filters.zona=document.getElementById('filter-zona').value;
+  S.filters.search=document.getElementById('search-inp').value;
+  S.selected.clear(); renderTable();
+}
+
+// ══════════════════════════════════════════════════════
+// SELECTION & BULK
+// ══════════════════════════════════════════════════════
+function toggleSel(id,checked) {
+  checked?S.selected.add(id):S.selected.delete(id); updateSelInfo();
+  const row=document.querySelector(`tr[data-id="${id}"]`); if(row) row.classList.toggle('selected',checked);
+  const vis=filteredRegistros().map(r=>r.id);
+  document.getElementById('cb-all').checked=vis.length&&vis.every(id=>S.selected.has(id));
+}
+function toggleAll(checked) { filteredRegistros().forEach(r=>checked?S.selected.add(r.id):S.selected.delete(r.id)); renderTable(); }
+function updateSelInfo() { const n=S.selected.size; document.getElementById('sel-info').textContent=n?`${n} seleccionada${n>1?'s':''}`:'Ninguna seleccionada'; }
+function bulkStatus(status) {
+  if(!S.selected.size){showToast('Selecciona al menos una tarea');return;}
+  const today=new Date().toISOString().slice(0,10), si=STATUSES.indexOf(status);
+  const regs=S.registros[S.currentPlanta]||[]; let n=0;
+  S.selected.forEach(id=>{
+    const r=regs.find(r=>r.id===id); if(!r||r.type!=='defecto') return;
+    r.status=status; if(!r.dates) r.dates={};
+    if(!r.dates['s'+(si+1)]) r.dates['s'+(si+1)]=today;
+    for(let i=0;i<si;i++){const k='s'+(i+1);if(!r.dates[k])r.dates[k]=today;}
+    n++;
+  });
+  save(); showToast(`✓ ${n} registro${n!==1?'s':''} marcado${n!==1?'s':''} como ${status}`);
+  S.selected.clear(); renderAll();
+}
+function quickObs(id,val){const r=(S.registros[S.currentPlanta]||[]).find(r=>r.id===id);if(r){r.obs=val;save();}}
+async function deleteReg(id) {
+  if(!await confirm2('¿Eliminar este registro?','Esta acción no se puede deshacer.')) return;
+  S.registros[S.currentPlanta]=(S.registros[S.currentPlanta]||[]).filter(r=>r.id!==id); save(); renderAll();
+}
+
+// ══════════════════════════════════════════════════════
+// MODAL
+// ══════════════════════════════════════════════════════
+let _modalId=null, _modalType='defecto';
+function openModal(id, defType) {
+  _modalId=id;
+  const zonas=sortedZonas(S.currentPlanta);
+  document.getElementById('modal-zona').innerHTML='<option value="">— Zona —</option>'+zonas.map(z=>`<option value="${z}">${z}</option>`).join('');
+  document.getElementById('modal-contrata').innerHTML='<option value="">— Contrata —</option>'+S.contratas.map(c=>`<option value="${c.id}">${c.name}${c.esp?' ('+c.esp+')':''}</option>`).join('');
+  if(id){
+    const r=(S.registros[S.currentPlanta]||[]).find(r=>r.id===id); if(!r) return;
+    document.getElementById('modal-title').textContent='Editar registro';
+    document.getElementById('modal-sub').textContent=r.zona+' · '+contrataName(r.contrata);
+    setModalType(r.type,false);
+    document.getElementById('modal-zona').value=r.zona||'';
+    document.getElementById('modal-contrata').value=r.contrata||'';
+    document.getElementById('modal-desc').value=r.desc||'';
+    document.getElementById('modal-obs').value=r.obs||'';
+    if(r.type==='defecto'){
+      setStatusUI(r.status);
+      ['s1','s2','s3','s4'].forEach((k,i)=>document.getElementById('md-f'+(i+1)).value=r.dates?.[k]||'');
+    } else {
+      document.getElementById('md-inst-date').value=r.instDate||'';
+      document.getElementById('md-inst-by').value=r.instBy||'';
+    }
+    renderModalPhotos(r);
+  } else {
+    document.getElementById('modal-title').textContent='Nuevo registro';
+    document.getElementById('modal-sub').textContent=S.plantas.find(p=>p.id===S.currentPlanta)?.name||'';
+    setModalType(defType||'defecto',false);
+    ['modal-zona','modal-contrata','modal-desc','modal-obs','md-f1','md-f2','md-f3','md-f4','md-inst-date','md-inst-by'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    setStatusUI('');
+    document.getElementById('photos-pre').innerHTML='';
+    document.getElementById('photos-post').innerHTML='';
+  }
+  document.getElementById('reg-overlay').classList.add('open');
+}
+function setModalType(type, update=true) {
+  _modalType=type;
+  const isInst=type==='instalacion';
+  document.getElementById('type-defecto').className='type-opt'+(type==='defecto'?' active-defecto':'');
+  document.getElementById('type-instalacion').className='type-opt'+(isInst?' active-instalacion':'');
+  document.getElementById('modal-status-section').style.display=isInst?'none':'';
+  document.getElementById('modal-dates-section').style.display=isInst?'none':'';
+  document.getElementById('modal-inst-date-section').style.display=isInst?'':'none';
+  document.getElementById('modal-pre-title').textContent=isInst?'📷 Fotos de la instalación':'📷 Fotos PRE servicio';
+  document.getElementById('modal-post-title').textContent=isInst?'📷 Fotos adicionales':'📷 Fotos POST servicio';
+}
+function setStatusUI(status) {
+  document.getElementById('modal-status-sel').innerHTML=STATUSES.map((s,i)=>{
+    const a=status===s?`as${i+1}`:'';
+    return `<div class="status-opt ${a}" onclick="setModalStatus('${s}')">${s}</div>`;
+  }).join('');
+}
+function setModalStatus(status) {
+  setStatusUI(status);
+  const today=new Date().toISOString().slice(0,10), si=STATUSES.indexOf(status);
+  if(!document.getElementById('md-f'+(si+1)).value) document.getElementById('md-f'+(si+1)).value=today;
+  for(let i=0;i<si;i++){const k='md-f'+(i+1);if(!document.getElementById(k).value)document.getElementById(k).value=today;}
+}
+function renderModalPhotos(r) {
+  renderPG('photos-pre',r.photoPre||[],'PRE');
+  renderPG('photos-post',r.photoPost||[],'POST');
+}
+function renderPG(cid,photos,lbl) {
+  document.getElementById(cid).innerHTML=photos.map((p,i)=>`<div class="photo-card"><img src="${p}" onclick="openLightbox('${p}')" alt=""><div class="photo-label">${lbl}</div><button class="photo-del" onclick="delPhoto('${cid}',${i})">✕</button></div>`).join('');
+}
+function addPhotos(type,input) {
+  const files=Array.from(input.files); if(!files.length) return;
+  let done=0;
+  files.forEach(f=>{
+    const fr=new FileReader();
+    fr.onload=e=>{
+      if(_modalId){
+        const r=(S.registros[S.currentPlanta]||[]).find(r=>r.id===_modalId);
+        if(r)(type==='pre'?r.photoPre:r.photoPost).push(e.target.result);
+      } else {
+        if(!window._tp) window._tp={pre:[],post:[]};
+        window._tp[type].push(e.target.result);
+      }
+      done++;
+      if(done===files.length){
+        if(_modalId){const r=(S.registros[S.currentPlanta]||[]).find(r=>r.id===_modalId);if(r){renderModalPhotos(r);save();}}
+        else{renderPG('photos-pre',window._tp?.pre||[],'PRE');renderPG('photos-post',window._tp?.post||[],'POST');}
+        showToast(`✓ ${files.length} foto${files.length>1?'s':''} añadida${files.length>1?'s':''}`);
+      }
+    };
+    fr.readAsDataURL(f);
+  });
+  input.value='';
+}
+function delPhoto(cid,idx) {
+  const type=cid==='photos-pre'?'pre':'post';
+  if(_modalId){const r=(S.registros[S.currentPlanta]||[]).find(r=>r.id===_modalId);if(r){(type==='pre'?r.photoPre:r.photoPost).splice(idx,1);renderModalPhotos(r);save();}}
+  else if(window._tp){window._tp[type].splice(idx,1);renderPG(cid,window._tp[type]||[],type.toUpperCase());}
+}
+function getSelStatus(){
+  const a=document.querySelector('#modal-status-sel .status-opt[class*="as"]');
+  if(!a) return '';
+  const i=parseInt(a.className.match(/as(\d)/)?.[1]||'0')-1;
+  return i>=0?STATUSES[i]:'';
+}
+function saveModal() {
+  const zona=document.getElementById('modal-zona').value;
+  const contrata=document.getElementById('modal-contrata').value;
+  const desc=document.getElementById('modal-desc').value.trim();
+  const obs=document.getElementById('modal-obs').value.trim();
+  if(!zona){showToast('Selecciona una zona');return;}
+  if(!contrata){showToast('Selecciona una contrata');return;}
+  if(!desc){showToast('Añade una descripción');return;}
+  if(!S.registros[S.currentPlanta]) S.registros[S.currentPlanta]=[];
+  if(_modalId){
+    const r=S.registros[S.currentPlanta].find(r=>r.id===_modalId);
+    if(r){
+      r.zona=zona;r.contrata=contrata;r.desc=desc;r.obs=obs;r.type=_modalType;
+      if(_modalType==='defecto'){r.status=getSelStatus();r.dates={s1:document.getElementById('md-f1').value,s2:document.getElementById('md-f2').value,s3:document.getElementById('md-f3').value,s4:document.getElementById('md-f4').value};}
+      else{r.instDate=document.getElementById('md-inst-date').value;r.instBy=document.getElementById('md-inst-by').value;}
+    }
+  } else {
+    S.registros[S.currentPlanta].push({
+      id:uid(),type:_modalType,zona,contrata,desc,obs,
+      status:_modalType==='defecto'?getSelStatus():'',
+      dates:_modalType==='defecto'?{s1:document.getElementById('md-f1').value,s2:document.getElementById('md-f2').value,s3:document.getElementById('md-f3').value,s4:document.getElementById('md-f4').value}:{},
+      instDate:document.getElementById('md-inst-date').value,
+      instBy:document.getElementById('md-inst-by').value,
+      photoPre:window._tp?.pre||[],photoPost:window._tp?.post||[],
+    });
+    window._tp=null;
+  }
+  save(); closeModal(); renderAll(); showToast('✓ Registro guardado');
+}
+function closeModal(){document.getElementById('reg-overlay').classList.remove('open');_modalId=null;window._tp=null;}
+function closeModalClick(e){if(e.target===document.getElementById('reg-overlay'))closeModal();}
+
+// ══════════════════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════════════════
+function renderConfig() {
+  document.getElementById('cfg-project-name').value=S.project.name||'';
+  document.getElementById('cfg-project-ref').value=S.project.ref||'';
+  document.getElementById('cfg-planta-list').innerHTML=S.plantas.map(p=>
+    `<div class="config-list-item"><span class="config-list-item-name">${p.name}</span><span class="config-list-item-sub">${(S.registros[p.id]||[]).length} reg</span>
+    <div class="config-list-item-actions"><button class="icon-btn" onclick="renamePlanta('${p.id}')">✏</button><button class="icon-btn del" onclick="deletePlanta('${p.id}')">🗑</button></div></div>`
+  ).join('')||'<div style="font-size:11px;color:var(--text3);">Sin plantas</div>';
+  const zsel=document.getElementById('cfg-zona-planta'),cur=zsel.value;
+  zsel.innerHTML='<option value="">— Selecciona planta —</option>'+S.plantas.map(p=>`<option value="${p.id}" ${p.id===cur?'selected':''}>${p.name}</option>`).join('');
+  renderCfgZonas();
+  document.getElementById('cfg-contrata-list').innerHTML=S.contratas.map(c=>
+    `<div class="config-list-item"><span class="config-list-item-name">${c.name}</span><span class="config-list-item-sub">${c.esp||'Sin especialidad'}</span>
+    <div class="config-list-item-actions"><button class="icon-btn" onclick="renameContrata('${c.id}')">✏</button><button class="icon-btn del" onclick="deleteContrata('${c.id}')">🗑</button></div></div>`
+  ).join('')||'<div style="font-size:11px;color:var(--text3);">Sin contratas</div>';
+}
+function renderCfgZonas() {
+  const pid=document.getElementById('cfg-zona-planta').value;
+  const wrap=document.getElementById('cfg-zonas-wrap'), add=document.getElementById('cfg-zona-add-row');
+  if(!pid){wrap.innerHTML='';add.style.display='none';return;}
+  add.style.display='flex';
+  const zonas=sortedZonas(pid);
+  wrap.innerHTML=zonas.length?zonas.map(z=>`<span class="zona-chip">${z}<button class="zona-chip-del" onclick="deleteZona('${pid}','${z}')">✕</button></span>`).join(''):'<span style="font-size:11px;color:var(--text3);">Sin zonas</span>';
+}
+
+// ══════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════
+function openLightbox(src){document.getElementById('lb-img').src=src;document.getElementById('lightbox').classList.add('open');}
+function closeLightbox(){document.getElementById('lightbox').classList.remove('open');}
+let _confirmResolve=null;
+function confirm2(title,msg){
+  document.getElementById('confirm-title').textContent=title;
+  document.getElementById('confirm-msg').textContent=msg;
+  document.getElementById('confirm-overlay').classList.add('open');
+  return new Promise(res=>{_confirmResolve=res;});
+}
+function confirmResolve(val){document.getElementById('confirm-overlay').classList.remove('open');if(_confirmResolve){_confirmResolve(val);_confirmResolve=null;}}
+let _tt;
+function showToast(msg){document.getElementById('toast-msg').textContent=msg;document.getElementById('toast').classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>document.getElementById('toast').classList.remove('show'),2800);}
+
+// ══════════════════════════════════════════════════════
+// BOOT
+// ══════════════════════════════════════════════════════
+renderAll();
+tryRestoreSession();
+</script>
+
+
+</body></html>
