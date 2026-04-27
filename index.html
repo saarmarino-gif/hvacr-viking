@@ -536,28 +536,84 @@ function uid() { return 'r_' + (++_id); }
 // ══════════════════════════════════════════════════════
 function loadGoogleScripts() { return Promise.resolve(); }
 function onTokenResponse() {}
+// GOOGLE DRIVE — implementación completa
+let gapi_loaded = false, gis_loaded = false;
+let token_client = null, access_token = null;
+let drive_file_id = null, drive_syncing = false;
+
+function loadGoogleScripts() {
+  return new Promise(res => {
+    const s1 = document.createElement('script');
+    s1.src = 'https://apis.google.com/js/api.js';
+    s1.onload = () => {
+      gapi.load('client', async () => {
+        await gapi.client.init({});
+        await gapi.client.load('https://www.googleapis.com/discovery/v1/apis/drive/v3/rest');
+        gapi_loaded = true;
+        if (gis_loaded) res();
+      });
+    };
+    document.head.appendChild(s1);
+    const s2 = document.createElement('script');
+    s2.src = 'https://accounts.google.com/gsi/client';
+    s2.onload = () => {
+      token_client = google.accounts.oauth2.initTokenClient({
+        client_id: CLIENT_ID,
+        scope: SCOPES,
+        callback: onTokenResponse,
+      });
+      gis_loaded = true;
+      if (gapi_loaded) res();
+    };
+    document.head.appendChild(s2);
+  });
+}
+
+function onTokenResponse(resp) {
+  if (resp.error) { setDriveStatus('error','Error auth'); return; }
+  access_token = resp.access_token;
+  gapi.client.setToken({ access_token });
+  sessionStorage.setItem('hv_token', access_token);
+  setDriveStatus('syncing','Conectando...');
+  closeDriveModal();
+  syncFromDrive();
+}
+
 function handleDriveBtn() {
-  document.getElementById('dm-icon').textContent = 'ℹ️';
-  document.getElementById('dm-title').textContent = 'Google Drive no disponible';
-  document.getElementById('dm-msg').textContent = 'La sincronización con Drive requiere que el archivo esté alojado en un servidor propio. Los datos se mantienen en memoria durante la sesión activa.';
-  document.getElementById('dm-file-info').style.display = 'none';
-  document.getElementById('dm-actions').innerHTML = '<button class="btn btn-ghost" onclick="closeDriveModal()">Entendido</button>';
+  if (access_token) {
+    document.getElementById('dm-icon').textContent = '✅';
+    document.getElementById('dm-title').textContent = 'Drive conectado';
+    document.getElementById('dm-msg').textContent = 'Los datos se sincronizan automáticamente con tu Google Drive.';
+    document.getElementById('dm-file-info').style.display = '';
+    document.getElementById('dm-file-name').textContent = FILE_NAME;
+    document.getElementById('dm-file-sub').textContent = 'Carpeta: ' + FOLDER_NAME;
+    document.getElementById('dm-actions').innerHTML =
+      '<button class="btn btn-ghost" onclick="closeDriveModal()">Cerrar</button>' +
+      '<button class="btn btn-accent" onclick="syncToDrive();closeDriveModal()">☁ Guardar ahora</button>' +
+      '<button class="btn btn-danger" onclick="disconnectDrive()">Desconectar</button>';
+  } else {
+    document.getElementById('dm-icon').textContent = '☁️';
+    document.getElementById('dm-title').textContent = 'Conectar Google Drive';
+    document.getElementById('dm-msg').textContent = 'Tus datos se guardarán automáticamente en una carpeta HVACR-VIKING en tu Google Drive.';
+    document.getElementById('dm-file-info').style.display = 'none';
+    document.getElementById('dm-actions').innerHTML =
+      '<button class="btn btn-ghost" onclick="closeDriveModal()">Cancelar</button>' +
+      '<button class="btn btn-accent" onclick="startDriveAuth()">🔑 Conectar con Google</button>';
+  }
   document.getElementById('drive-overlay').classList.add('open');
 }
+
 function closeDriveModal() { document.getElementById('drive-overlay').classList.remove('open'); }
+
 function setDriveStatus(state, label) {
+  const dot = document.getElementById('drive-dot');
   const lbl = document.getElementById('drive-lbl');
-  if(lbl) lbl.textContent = label;
-}
-function startDriveAuth() {}
-function disconnectDrive() {}
-async function getOrCreateFolder() {}
-async function findDataFile() {}
-async function syncFromDrive() {}
-async function syncToDrive() {}
-function scheduleSyncToDrive() {}
-function save() { saveLocal(); }
-async function tryRestoreSession() {}
+  if (dot) dot.className = 'drive-dot' + (state ? ' ' + state : '');
+  if (lbl) lbl.textContent = label;
+  const btn = document.getElementById('btn-drive');
+  if (!btn) return;
+  if (state === 'ok') { btn.textContent = '☁ Drive ✓'; btn.classList.add('connected'); }
+  else if (state === '
 
 // ══════════════════════════════════════════════════════
 // NAV
