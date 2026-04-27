@@ -531,19 +531,7 @@ function uid() { return 'r_' + (++_id); }
 // ══════════════════════════════════════════════════════
 // GOOGLE DRIVE
 // ══════════════════════════════════════════════════════
-// ══════════════════════════════════════════════════════
-// GOOGLE DRIVE — no disponible en este entorno
-// ══════════════════════════════════════════════════════
-function loadGoogleScripts() { return Promise.resolve(); }
-function onTokenResponse() {}
-// GOOGLE DRIVE — implementación completa
-let gapi_loaded = false, gis_loaded = false;
-let token_client = null, access_token = null;
-let drive_file_id = null, drive_syncing = false;
 
-function loadGoogleScripts() {
-  return new Promise(res => {
-    const s1 = document.createElement('script');
     s1.src = 'https://apis.google.com/js/api.js';
     s1.onload = () => {
       gapi.load('client', async () => {
